@@ -1,6 +1,7 @@
 import tkinter as tk
 import customtkinter as ctk
 from PIL import ImageTk, Image
+import savedpasswords
 
 FUTURA_FONT_XS = ("Futura", 12, 'normal')
 FUTURA_FONT_S = ("Futura", 18, 'normal')
@@ -11,6 +12,7 @@ APP_BACKGROUND_COLOR = "#FFFFFF"
 APP_SECONDARY_COLOR = "#9C9C9C"
 TITLE_TEXT_COLOR = "#848484"
 
+ICON_SIZE_XS = (25, 25)
 ICON_SIZE_S = (30, 30)
 ICON_SIZE_L = (32, 32)
 
@@ -42,6 +44,7 @@ EMOJI_CREDIT_CARD_PATH = "./assets/credit_card.png"
 EMOJI_BELL_PATH = "./assets/bell.png"
 EMOJI_GEAR_PATH = "./assets/gear.png"
 EMOJI_USER_PATH = "./assets/user.png"
+EMOJI_LOCK_PATH = "./assets/lock.png"
 
 rowCounter = 2
 
@@ -94,9 +97,10 @@ signatureImage = ctk.CTkImage(Image.open(EMOJI_SIGNATURE_PATH).resize(ICON_SIZE_
 steganographyImage = ctk.CTkImage(Image.open(EMOJI_STEGANOGRAPHY_PATH).resize(ICON_SIZE_S))
 identityImage = ctk.CTkImage(Image.open(EMOJI_IDENTITY_PATH).resize(ICON_SIZE_S))
 creditCardImage = ctk.CTkImage(Image.open(EMOJI_CREDIT_CARD_PATH).resize(ICON_SIZE_S))
-bellImage = ctk.CTkImage(Image.open(EMOJI_BELL_PATH).resize((25, 25)))
-gearImage = ctk.CTkImage(Image.open(EMOJI_GEAR_PATH).resize((25, 25)))
-userImage = ctk.CTkImage(Image.open(EMOJI_USER_PATH).resize((25, 25)))
+bellImage = ctk.CTkImage(Image.open(EMOJI_BELL_PATH).resize((25, 25)), size=ICON_SIZE_XS)
+gearImage = ctk.CTkImage(Image.open(EMOJI_GEAR_PATH).resize((25, 25)), size=ICON_SIZE_XS)
+userImage = ctk.CTkImage(Image.open(EMOJI_USER_PATH).resize((25, 25)), size=ICON_SIZE_XS)
+lockImage = ctk.CTkImage(Image.open(EMOJI_LOCK_PATH).resize((25, 25)), size=ICON_SIZE_S)
 
 options = [
     tk.Canvas(optionsSideBarFrame, width=OPTIONSIDEBAR_WIDTH - 35, height=1, bg="#A9A9A9", highlightthickness=0),
@@ -131,7 +135,7 @@ for i in range(len(options)):
 topFrame = tk.Frame(contextMainFrame, bg=APP_BACKGROUND_COLOR)
 topFrame.pack(fill=tk.X, padx=20, pady=20)
 
-searchEntry = ctk.CTkEntry(topFrame, font=FUTURA_FONT_S, width=450, height=40, corner_radius=15, fg_color="#E0E0E0", text_color=APP_SECONDARY_COLOR, border_width=0)
+searchEntry = ctk.CTkEntry(topFrame, font=FUTURA_FONT_S, width=450, height=40, corner_radius=15, fg_color="#E0E0E0", text_color=APP_SECONDARY_COLOR, border_width=0, placeholder_text="🔎 Cerca in LockBox", placeholder_text_color=APP_SECONDARY_COLOR)
 searchEntry.pack(side=tk.LEFT, padx=(0, 10))
 
 # Create buttons with emoji images
@@ -179,21 +183,45 @@ def mypasswordspage():
     description = ctk.CTkLabel(descriptionframe, text=MYPASSWORDS_DESCRIPTION, font=FUTURA_FONT_XS, text_color="#C5C5C5", wraplength=600)
     description.pack(padx=20, pady=20)
 
-    for passwordsRow in range(3):
-        for passwordsCol in range(4):
-            passwordObj = ctk.CTkFrame(
-                mypasswordsframe,
-                corner_radius=20,
-                bg_color=APP_BACKGROUND_COLOR,
-                fg_color="red",
-                width=170,
-                height=100,
-                border_width=1,
-                border_color="#A9A9A9"
-            )
-            passwordObj.grid(row=passwordsRow + 2, column=passwordsCol, padx=10, pady=10)
-            passwordServiceName = ctk.CTkLabel(passwordObj, text="instagram", font=FUTURA_FONT_S)
-            passwordServiceName.pack(side=tk.BOTTOM, padx=10, pady=10)
+    passwords_data = [ # deve essere reso piu sicuro, rappresenta la struttura dati delle password
+        savedpasswords.SavedPassword("Instagram", "user1", "password1"),
+        savedpasswords.SavedPassword("Google", "user2", "password2"),
+        savedpasswords.SavedPassword("Twitter", "user3", "password3"),
+        savedpasswords.SavedPassword("GitHub", "user3", "password3"),
+        savedpasswords.SavedPassword("Facebook", "user3", "password3"),
+        savedpasswords.SavedPassword("Autodesk", "user3", "password3"),
+        savedpasswords.SavedPassword("Microsoft", "user3", "password3"),
+        savedpasswords.SavedPassword("Amazon", "user3", "password3"),
+        savedpasswords.SavedPassword("Facebook", "user3", "password3"),
+        savedpasswords.SavedPassword("Autodesk", "user3", "password3"),
+        savedpasswords.SavedPassword("Microsoft", "user3", "password3"),
+        savedpasswords.SavedPassword("Amazon", "user3", "password3"),
+    ]
+
+    maxVisiblePasswords = 7
+
+    for index, saved_password in enumerate(passwords_data):
+        passwordsRow = index // 4
+        passwordsCol = index % 4
+
+        passwordObj = ctk.CTkButton(
+            mypasswordsframe,
+            corner_radius=20,
+            bg_color=APP_BACKGROUND_COLOR,
+            fg_color=saved_password.bg_color,
+            width=170,
+            height=100,
+            hover=False
+        )
+        passwordObj.grid(row=passwordsRow + 2, column=passwordsCol, padx=10, pady=10)
+        passwordObj.pack_propagate(False)
+
+        lockerText = ctk.CTkLabel(passwordObj, image=lockImage, compound="left", text=" ..........", text_color="white",
+                                  font=FUTURA_FONT_M, anchor="e", fg_color=saved_password.bg_color, bg_color=saved_password.bg_color)
+        passwordServiceName = ctk.CTkLabel(passwordObj, text=saved_password.service_name, font=FUTURA_FONT_S,
+                                           anchor="e", fg_color=saved_password.bg_color, bg_color=saved_password.bg_color, text_color="white")
+        passwordServiceName.pack(padx=5, pady=5)
+        lockerText.pack(padx=5, pady=5)
 
 
 def lockgenpage():

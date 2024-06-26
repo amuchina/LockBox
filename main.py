@@ -1,8 +1,11 @@
 import tkinter as tk
 import customtkinter as ctk
 from PIL import ImageTk, Image
+import LockBoxDBManager as dbm
 import mysql.connector
-import savedpasswords
+from Locker import Locker
+from Auth import Auth
+from User import User
 import random
 import string
 
@@ -67,6 +70,7 @@ mainApp.title("LockBox")
 mainApp.iconbitmap("./assets/lockboxlogo.ico")
 mainApp.geometry(WINDOW_DIM)
 mainApp.resizable(False, False)
+
 
 # frames setup
 
@@ -162,34 +166,31 @@ usernameButton.pack(side=tk.RIGHT, padx=(10, 0))
 dividerLine = tk.Canvas(contextMainFrame, width=topFrame.winfo_width(), height=1, bg="#A9A9A9", highlightthickness=0)
 dividerLine.pack(side=tk.TOP, fill=tk.X, padx=20, pady=(0, 20))
 
-
-def dbconnect():
-    global lockboxdb, lockboxdbcontroller
-    lockboxdb = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="password"
-    )
-    lockboxdbcontroller = lockboxdb.cursor()
-
 def switchpage(page):
-    if page == newpasswordpage:
+    if page == newlockerpage:
         for frame in mainFrame.winfo_children():
             frame.destroy()
             mainApp.update()
-            print("nulla")
     else:
         for frame in mainFrame.winfo_children():
             frame.destroy()
             mainApp.update()
-            print("ripulito")
     page()
 
 
-def createnewlocker():
+def createnewlocker(lockerdata):
+    locker = Locker(service_name=lockerdata[0], username=lockerdata[1], password=lockerdata[2])
     query = "INSERT INTO lockbox.lockers (service_name, username, password, locker_owner_ID) VALUES (%s, %s, %s, %s)"
+    try:
+        lockboxdbcontroller.get_cursor().execute(query, (locker.service_name, locker.username, locker.password, 1))
+        lockboxdbcontroller.conn.commit()
+        print("Locker created successfully")
+    except mysql.connector.Error as err:
+        print(f"Error in locker creation: {err}")
+    finally:
+        lockboxdbcontroller.get_cursor().close()
 
-    lockboxdbcontroller.execute(query, ("Google", "giovadesio26@gmail.com", "dbuSdb627SVwj1!@$%#sb2", 1))
+
 # pages functions
 def mypasswordspage():
     mypasswordsframe = tk.Frame(mainFrame, bg=APP_BACKGROUND_COLOR)
@@ -259,7 +260,7 @@ def mypasswordspage():
                 width=170,
                 height=100,
                 corner_radius=20,
-                command=lambda: switchpage(page=newpasswordpage)
+                command=lambda: switchpage(page=newlockerpage)
             )
             nextRow = len(passwords_data) // 4 + 2
             nextCol = len(passwords_data) % 4
@@ -269,7 +270,21 @@ def mypasswordspage():
     refresh_passwords_grid()
 
 
-def newpasswordpage():
+def newlockerpage():
+    lockerdata = []
+
+    def fetchandcreate():
+        if passwordEntry.get() == confirmPasswordEntry.get():
+            lockerdata.append(serviceNameEntry.get())
+            lockerdata.append(usernameEntry.get())
+            lockerdata.append(passwordEntry.get())
+            createnewlocker(lockerdata)
+            switchpage(page=mypasswordspage)
+        else:
+            passwordEntry.configure(border_width=2, border_color="red", text_color="red")
+            confirmPasswordEntry.configure(border_width=2, border_color="red", text_color="red")
+
+
     newpasswordsframe = ctk.CTkFrame(mainFrame)
     newpasswordsframe.configure(bg_color=APP_BACKGROUND_COLOR, fg_color=APP_BACKGROUND_COLOR)
     newpasswordpagetitle = ctk.CTkLabel(
@@ -308,7 +323,7 @@ def newpasswordpage():
         text_color=APP_SECONDARY_COLOR,
         border_width=0,
         placeholder_text="Inserisci il nome del servizio",
-        placeholder_text_color=APP_SECONDARY_COLOR
+        placeholder_text_color=APP_SECONDARY_COLOR,
     )
     serviceNameEntry.grid(row=2, column=1, padx=(20, 0), pady=(20, 10), sticky="w")
 
@@ -395,7 +410,7 @@ def newpasswordpage():
         fg_color="#FB62AC",
         hover_color="#F1328D",
         border_width=0,
-        command=lambda: createnewlocker()
+        command=lambda: fetchandcreate()
     )
     saveButton.grid(row=6, column=1, pady=(15, 0), padx=(0, 0), sticky="e")
 
@@ -550,6 +565,9 @@ def profilepage():
     )
     profilepagetitle.pack(padx=30, pady=0, anchor="w")
     profileframe.pack(fill=tk.BOTH, expand=True)
+    user = User("amuchina", "redos")
+    authenticator = Auth()
+    authenticateduser = authenticator.register(user.to_dict(), lockboxdbcontroller)
 
 
 def settingspage():
@@ -587,5 +605,5 @@ mainFrame = tk.Frame(contextMainFrame, bg=APP_BACKGROUND_COLOR)
 mainFrame.pack(fill=tk.BOTH, expand=True)
 
 mypasswordspage()
-dbconnect()
+lockboxdbcontroller = dbm.LockBoxDBManager()
 mainApp.mainloop()

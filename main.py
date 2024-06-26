@@ -1,7 +1,10 @@
 import tkinter as tk
 import customtkinter as ctk
 from PIL import ImageTk, Image
+import mysql.connector
 import savedpasswords
+import random
+import string
 
 FUTURA_FONT_XS = ("Futura", 12, 'normal')
 FUTURA_FONT_S = ("Futura", 18, 'normal')
@@ -20,6 +23,14 @@ TITLE_NAME = "LockBox"
 P_TEXT = "Stay safe, stay locked"
 
 MYPASSWORDS_DESCRIPTION = "Salva qui le tue password e tienile al sicuro nei locker! Utilizziamo il moderno ed efficace algoritmo di hashing crittografico SHA-256 con l’aggiunta del tuo “salt” (codice univoco individuale) per rendere ancora piu’ improbabili le minaccie alla sicurezza delle tue password!"
+NEWPASSWORDS_DESCRIPTION = """In questa pagina puoi salvare le tue password nei tuoi locker
+e crittografarle, per rendere piu' difficile il lavoro agli hacker. È facile!
+Come Funziona:
+Nome del servizio: Scrivi il nome del sito o dell'app.
+Username: Inserisci il tuo nome utente.
+Password: Digita la tua password segreta.
+Conferma Password: Riscrivi la password per sicurezza.
+Premi su 'Salva' e voilà, la tua nuova password è al sicuro!"""
 
 WINDOW_DIM = "1100x700"
 
@@ -152,14 +163,33 @@ dividerLine = tk.Canvas(contextMainFrame, width=topFrame.winfo_width(), height=1
 dividerLine.pack(side=tk.TOP, fill=tk.X, padx=20, pady=(0, 20))
 
 
-def switchpage(page):
-    for frame in mainFrame.winfo_children():
-        frame.destroy()
-        mainApp.update()
+def dbconnect():
+    global lockboxdb, lockboxdbcontroller
+    lockboxdb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="password"
+    )
+    lockboxdbcontroller = lockboxdb.cursor()
 
+def switchpage(page):
+    if page == newpasswordpage:
+        for frame in mainFrame.winfo_children():
+            frame.destroy()
+            mainApp.update()
+            print("nulla")
+    else:
+        for frame in mainFrame.winfo_children():
+            frame.destroy()
+            mainApp.update()
+            print("ripulito")
     page()
 
 
+def createnewlocker():
+    query = "INSERT INTO lockbox.lockers (service_name, username, password, locker_owner_ID) VALUES (%s, %s, %s, %s)"
+
+    lockboxdbcontroller.execute(query, ("Google", "giovadesio26@gmail.com", "dbuSdb627SVwj1!@$%#sb2", 1))
 # pages functions
 def mypasswordspage():
     mypasswordsframe = tk.Frame(mainFrame, bg=APP_BACKGROUND_COLOR)
@@ -183,46 +213,193 @@ def mypasswordspage():
     description = ctk.CTkLabel(descriptionframe, text=MYPASSWORDS_DESCRIPTION, font=FUTURA_FONT_XS, text_color="#C5C5C5", wraplength=600)
     description.pack(padx=20, pady=20)
 
-    passwords_data = [ # deve essere reso piu sicuro, rappresenta la struttura dati delle password
-        savedpasswords.SavedPassword("Instagram", "user1", "password1"),
-        savedpasswords.SavedPassword("Google", "user2", "password2"),
-        savedpasswords.SavedPassword("Twitter", "user3", "password3"),
-        savedpasswords.SavedPassword("GitHub", "user3", "password3"),
-        savedpasswords.SavedPassword("Facebook", "user3", "password3"),
-        savedpasswords.SavedPassword("Autodesk", "user3", "password3"),
-        savedpasswords.SavedPassword("Microsoft", "user3", "password3"),
-        savedpasswords.SavedPassword("Amazon", "user3", "password3"),
-        savedpasswords.SavedPassword("Facebook", "user3", "password3"),
-        savedpasswords.SavedPassword("Autodesk", "user3", "password3"),
-        savedpasswords.SavedPassword("Microsoft", "user3", "password3"),
-        savedpasswords.SavedPassword("Amazon", "user3", "password3"),
-    ]
+    # Lista di password vuota iniziale
+    passwords_data = []
 
-    maxVisiblePasswords = 7
+    def refresh_passwords_grid():
+        if 'mypasswordsframe' in globals():
+            for widget in mypasswordsframe.winfo_children():
+                widget.destroy()
 
-    for index, saved_password in enumerate(passwords_data):
-        passwordsRow = index // 4
-        passwordsCol = index % 4
+        max_visible_passwords = 11
 
-        passwordObj = ctk.CTkButton(
-            mypasswordsframe,
-            corner_radius=20,
-            bg_color=APP_BACKGROUND_COLOR,
-            fg_color=saved_password.bg_color,
-            width=170,
-            height=100,
-            hover=False
-        )
-        passwordObj.grid(row=passwordsRow + 2, column=passwordsCol, padx=10, pady=10)
-        passwordObj.pack_propagate(False)
+        # Mostra solo le prime max_visible_passwords password
+        for index, saved_password in enumerate(passwords_data[:max_visible_passwords]):
+            passwordsRow = index // 4
+            passwordsCol = index % 4
 
-        lockerText = ctk.CTkLabel(passwordObj, image=lockImage, compound="left", text=" ..........", text_color="white",
-                                  font=FUTURA_FONT_M, anchor="e", fg_color=saved_password.bg_color, bg_color=saved_password.bg_color)
-        passwordServiceName = ctk.CTkLabel(passwordObj, text=saved_password.service_name, font=FUTURA_FONT_S,
-                                           anchor="e", fg_color=saved_password.bg_color, bg_color=saved_password.bg_color, text_color="white")
-        passwordServiceName.pack(padx=5, pady=5)
-        lockerText.pack(padx=5, pady=5)
+            passwordObj = ctk.CTkButton(
+                mypasswordsframe,
+                corner_radius=20,
+                bg_color=APP_BACKGROUND_COLOR,
+                fg_color=saved_password.bg_color,
+                width=170,
+                height=100,
+                hover=False
+            )
+            passwordObj.grid(row=passwordsRow + 2, column=passwordsCol, padx=10, pady=10)
+            passwordObj.pack_propagate(False)
 
+            lockerText = ctk.CTkLabel(passwordObj, image=lockImage, compound="left", text=" ..........",
+                                      text_color="white",
+                                      font=FUTURA_FONT_M, anchor="e", fg_color=saved_password.bg_color,
+                                      bg_color=saved_password.bg_color)
+            passwordServiceName = ctk.CTkLabel(passwordObj, text=saved_password.service_name, font=FUTURA_FONT_S,
+                                               anchor="e", fg_color=saved_password.bg_color,
+                                               bg_color=saved_password.bg_color, text_color="white")
+            passwordServiceName.pack(padx=5, pady=5)
+            lockerText.pack(padx=5, pady=5)
+
+        # Aggiungi il pulsante "+" alla fine della griglia se il numero di password è inferiore a max_visible_passwords
+        if len(passwords_data) <= max_visible_passwords:
+            addPasswordButton = ctk.CTkButton(
+                mypasswordsframe,
+                text="+",
+                font=FUTURA_FONT_L,
+                width=170,
+                height=100,
+                corner_radius=20,
+                command=lambda: switchpage(page=newpasswordpage)
+            )
+            nextRow = len(passwords_data) // 4 + 2
+            nextCol = len(passwords_data) % 4
+            addPasswordButton.grid(row=nextRow, column=nextCol, padx=10, pady=10)
+
+    # Inizializza la griglia delle password (vuota all'inizio)
+    refresh_passwords_grid()
+
+
+def newpasswordpage():
+    newpasswordsframe = ctk.CTkFrame(mainFrame)
+    newpasswordsframe.configure(bg_color=APP_BACKGROUND_COLOR, fg_color=APP_BACKGROUND_COLOR)
+    newpasswordpagetitle = ctk.CTkLabel(
+        newpasswordsframe,
+        text="Salva una nuova password ",
+        font=FUTURA_FONT_L,
+        text_color=TITLE_TEXT_COLOR,
+        fg_color=APP_BACKGROUND_COLOR,
+        bg_color=APP_BACKGROUND_COLOR
+    )
+    newpasswordpagetitle.grid(row=0, column=0, columnspan=4, pady=(0, 20), padx=(20, 0), sticky="w")
+    descriptionframe = ctk.CTkFrame(newpasswordsframe, corner_radius=20, bg_color=APP_BACKGROUND_COLOR,
+                                    fg_color="#F4F4F4", width=600, height=100)
+    descriptionframe.grid(row=1, column=0, columnspan=4, padx=(20, 0), pady=(0, 20), sticky="w")
+
+    description = ctk.CTkLabel(descriptionframe, text=NEWPASSWORDS_DESCRIPTION, font=FUTURA_FONT_XS,
+                               text_color="#C5C5C5", wraplength=600)
+    description.pack(padx=20, pady=20)
+    serviceNameLabel = ctk.CTkLabel(
+        newpasswordsframe,
+        text="Nome Servizio:",
+        font=FUTURA_FONT_S,
+        text_color=APP_SECONDARY_COLOR,
+        fg_color=APP_BACKGROUND_COLOR,
+        bg_color=APP_BACKGROUND_COLOR
+    )
+    serviceNameLabel.grid(row=2, column=0, padx=(20, 0), pady=(20, 10), sticky="w")
+
+    serviceNameEntry = ctk.CTkEntry(
+        newpasswordsframe,
+        font=FUTURA_FONT_S,
+        width=400,
+        height=40,
+        corner_radius=10,
+        fg_color="#E0E0E0",
+        text_color=APP_SECONDARY_COLOR,
+        border_width=0,
+        placeholder_text="Inserisci il nome del servizio",
+        placeholder_text_color=APP_SECONDARY_COLOR
+    )
+    serviceNameEntry.grid(row=2, column=1, padx=(20, 0), pady=(20, 10), sticky="w")
+
+    usernameLabel = ctk.CTkLabel(
+        newpasswordsframe,
+        text="Username (o email):",
+        font=FUTURA_FONT_S,
+        text_color=APP_SECONDARY_COLOR,
+        fg_color=APP_BACKGROUND_COLOR,
+        bg_color=APP_BACKGROUND_COLOR
+    )
+    usernameLabel.grid(row=3, column=0, padx=(20, 0), pady=10, sticky="w")
+
+    usernameEntry = ctk.CTkEntry(
+        newpasswordsframe,
+        font=FUTURA_FONT_S,
+        width=400,
+        height=40,
+        corner_radius=10,
+        fg_color="#E0E0E0",
+        text_color=APP_SECONDARY_COLOR,
+        border_width=0,
+        placeholder_text="Inserisci il tuo username",
+        placeholder_text_color=APP_SECONDARY_COLOR
+    )
+    usernameEntry.grid(row=3, column=1, padx=(20, 0), pady=10, sticky="w")
+
+    passwordLabel = ctk.CTkLabel(
+        newpasswordsframe,
+        text="Password:",
+        font=FUTURA_FONT_S,
+        text_color=APP_SECONDARY_COLOR,
+        fg_color=APP_BACKGROUND_COLOR,
+        bg_color=APP_BACKGROUND_COLOR
+    )
+    passwordLabel.grid(row=4, column=0, padx=(20, 0), pady=10, sticky="w")
+
+    passwordEntry = ctk.CTkEntry(
+        newpasswordsframe,
+        font=FUTURA_FONT_S,
+        width=400,
+        height=40,
+        corner_radius=10,
+        fg_color="#E0E0E0",
+        text_color=APP_SECONDARY_COLOR,
+        border_width=0,
+        placeholder_text="Inserisci la tua password",
+        placeholder_text_color=APP_SECONDARY_COLOR
+    )
+    passwordEntry.grid(row=4, column=1, padx=(20, 0), pady=10, sticky="w")
+
+    confirmPasswordLabel = ctk.CTkLabel(
+        newpasswordsframe,
+        text="Conferma Password:",
+        font=FUTURA_FONT_S,
+        text_color=APP_SECONDARY_COLOR,
+        fg_color=APP_BACKGROUND_COLOR,
+        bg_color=APP_BACKGROUND_COLOR
+    )
+    confirmPasswordLabel.grid(row=5, column=0, padx=(20, 0), pady=10, sticky="w")
+
+    confirmPasswordEntry = ctk.CTkEntry(
+        newpasswordsframe,
+        font=FUTURA_FONT_S,
+        width=400,
+        height=40,
+        corner_radius=10,
+        fg_color="#E0E0E0",
+        text_color=APP_SECONDARY_COLOR,
+        border_width=0,
+        placeholder_text="Riscrivi la tua password",
+        placeholder_text_color=APP_SECONDARY_COLOR
+    )
+    confirmPasswordEntry.grid(row=5, column=1, padx=(20, 0), pady=10, sticky="w")
+
+    saveButton = ctk.CTkButton(
+        newpasswordsframe,
+        text="Salva",
+        text_color="white",
+        font=FUTURA_FONT_S,
+        corner_radius=15,
+        width=150,
+        height=40,
+        fg_color="#FB62AC",
+        hover_color="#F1328D",
+        border_width=0,
+        command=lambda: createnewlocker()
+    )
+    saveButton.grid(row=6, column=1, pady=(15, 0), padx=(0, 0), sticky="e")
+
+    newpasswordsframe.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
 def lockgenpage():
     lockgenframe = tk.Frame(mainFrame)
@@ -410,4 +587,5 @@ mainFrame = tk.Frame(contextMainFrame, bg=APP_BACKGROUND_COLOR)
 mainFrame.pack(fill=tk.BOTH, expand=True)
 
 mypasswordspage()
+dbconnect()
 mainApp.mainloop()

@@ -62,6 +62,8 @@ EMOJI_LOCK_PATH = "./assets/lock.png"
 
 rowCounter = 2
 
+authenticated_user = None
+
 mainApp = tk.Tk()
 
 # app init settings
@@ -160,11 +162,19 @@ bellButton.pack(side=tk.RIGHT, padx=(10, 0))
 gearButton = ctk.CTkButton(topFrame, image=gearImage, text="", corner_radius=15, width=40, height=40, fg_color="#DFDFDF", hover_color="#BEBEBE", border_width=0, command=lambda: switchpage(page=settingspage))
 gearButton.pack(side=tk.RIGHT, padx=(10, 0))
 
-usernameButton = ctk.CTkButton(topFrame, image=userImage, text="giovi", corner_radius=15, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", hover_color="#BEBEBE", height=40, border_width=0, command=lambda: switchpage(page=profilepage))
-usernameButton.pack(side=tk.RIGHT, padx=(10, 0))
+if authenticated_user is not None:
+    usernameButton = ctk.CTkButton(topFrame, image=userImage, text="giovi", corner_radius=15, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", hover_color="#BEBEBE", height=40, border_width=0, command=lambda: switchpage(page=profilepage))
+    usernameButton.pack(side=tk.RIGHT, padx=(10, 0))
+else:
+    loginButton = ctk.CTkButton(topFrame, text="Accedi", corner_radius=15, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", hover_color="#BEBEBE", height=40, border_width=0, command=lambda: switchpage(page=loginpage))
+    loginButton.pack(side=tk.RIGHT, padx=(10, 0))
 
 dividerLine = tk.Canvas(contextMainFrame, width=topFrame.winfo_width(), height=1, bg="#A9A9A9", highlightthickness=0)
 dividerLine.pack(side=tk.TOP, fill=tk.X, padx=20, pady=(0, 20))
+
+
+def set_auth_user(user: User):
+    authenticated_user = user
 
 def switchpage(page):
     if page == newlockerpage:
@@ -270,6 +280,90 @@ def mypasswordspage():
     refresh_passwords_grid()
 
 
+def registerpage():
+    registerframe = tk.Frame(mainFrame)
+    registerframe.pack(fill=tk.BOTH, expand=True)
+    registerframe.configure(background=APP_BACKGROUND_COLOR)
+    registerpagetitle = ctk.CTkLabel(
+        registerframe,
+        text="Crea un nuovo account",
+        font=FUTURA_FONT_L,
+        text_color=TITLE_TEXT_COLOR,
+        fg_color=APP_BACKGROUND_COLOR,
+        bg_color=APP_BACKGROUND_COLOR
+    )
+    registerpagetitle.pack(padx=30, pady=0, anchor="w")
+
+#
+
+    user = User("", "")
+    user.set_name("")
+    user.set_surname()
+    authenticator = Auth()
+    authenticateduser = authenticator.register(user, lockboxdbcontroller)
+
+
+def loginpage():
+    loginframe = tk.Frame(mainFrame)
+    loginframe.pack(fill=tk.BOTH, expand=False, padx=250, pady=50)
+    loginframe.configure(background=APP_BACKGROUND_COLOR)
+
+    loginpagetitle = ctk.CTkLabel(
+        loginframe,
+        text="Accedi",
+        font=FUTURA_FONT_L,
+        text_color=TITLE_TEXT_COLOR,
+        fg_color=APP_BACKGROUND_COLOR,
+        bg_color=APP_BACKGROUND_COLOR
+    )
+    loginpagetitle.grid(row=0, column=0, pady=(0, 5))
+
+    usernameEntry = ctk.CTkEntry(
+        loginframe,
+        font=FUTURA_FONT_S,
+        width=250,
+        height=40,
+        corner_radius=10,
+        fg_color="#E0E0E0",
+        text_color=APP_SECONDARY_COLOR,
+        border_width=0,
+        placeholder_text="Username (o email)",
+        placeholder_text_color=APP_SECONDARY_COLOR,
+    )
+    usernameEntry.grid(row=1, column=0, pady=(0, 5))
+
+    passwordEntry = ctk.CTkEntry(
+        loginframe,
+        font=FUTURA_FONT_S,
+        width=250,
+        height=40,
+        corner_radius=10,
+        fg_color="#E0E0E0",
+        text_color=APP_SECONDARY_COLOR,
+        border_width=0,
+        placeholder_text="Password",
+        placeholder_text_color=APP_SECONDARY_COLOR
+    )
+    passwordEntry.grid(row=2, column=0, pady=(0, 5))
+
+    submitButton = ctk.CTkButton(
+        loginframe,
+        text="Accedi",
+        text_color="white",
+        font=FUTURA_FONT_S,
+        corner_radius=15,
+        width=150,
+        height=40,
+        fg_color="#FB62AC",
+        hover_color="#F1328D",
+        border_width=0,
+    )
+    submitButton.grid(row=3, column=0, padx=(20, 0), pady=(0, 0))
+    user = User("", "")
+    authenticator = Auth()
+    authenticateduser = authenticator.login(user, lockboxdbcontroller)
+
+
 def newlockerpage():
     lockerdata = []
 
@@ -285,18 +379,18 @@ def newlockerpage():
             confirmPasswordEntry.configure(border_width=2, border_color="red", text_color="red")
 
 
-    newpasswordsframe = ctk.CTkFrame(mainFrame)
-    newpasswordsframe.configure(bg_color=APP_BACKGROUND_COLOR, fg_color=APP_BACKGROUND_COLOR)
-    newpasswordpagetitle = ctk.CTkLabel(
-        newpasswordsframe,
+    newlockerframe = ctk.CTkFrame(mainFrame)
+    newlockerframe.configure(bg_color=APP_BACKGROUND_COLOR, fg_color=APP_BACKGROUND_COLOR)
+    newlockerpagetitle = ctk.CTkLabel(
+        newlockerframe,
         text="Salva una nuova password ",
         font=FUTURA_FONT_L,
         text_color=TITLE_TEXT_COLOR,
         fg_color=APP_BACKGROUND_COLOR,
         bg_color=APP_BACKGROUND_COLOR
     )
-    newpasswordpagetitle.grid(row=0, column=0, columnspan=4, pady=(0, 20), padx=(20, 0), sticky="w")
-    descriptionframe = ctk.CTkFrame(newpasswordsframe, corner_radius=20, bg_color=APP_BACKGROUND_COLOR,
+    newlockerpagetitle.grid(row=0, column=0, columnspan=4, pady=(0, 20), padx=(20, 0), sticky="w")
+    descriptionframe = ctk.CTkFrame(newlockerframe, corner_radius=20, bg_color=APP_BACKGROUND_COLOR,
                                     fg_color="#F4F4F4", width=600, height=100)
     descriptionframe.grid(row=1, column=0, columnspan=4, padx=(20, 0), pady=(0, 20), sticky="w")
 
@@ -304,7 +398,7 @@ def newlockerpage():
                                text_color="#C5C5C5", wraplength=600)
     description.pack(padx=20, pady=20)
     serviceNameLabel = ctk.CTkLabel(
-        newpasswordsframe,
+        newlockerframe,
         text="Nome Servizio:",
         font=FUTURA_FONT_S,
         text_color=APP_SECONDARY_COLOR,
@@ -314,7 +408,7 @@ def newlockerpage():
     serviceNameLabel.grid(row=2, column=0, padx=(20, 0), pady=(20, 10), sticky="w")
 
     serviceNameEntry = ctk.CTkEntry(
-        newpasswordsframe,
+        newlockerframe,
         font=FUTURA_FONT_S,
         width=400,
         height=40,
@@ -328,7 +422,7 @@ def newlockerpage():
     serviceNameEntry.grid(row=2, column=1, padx=(20, 0), pady=(20, 10), sticky="w")
 
     usernameLabel = ctk.CTkLabel(
-        newpasswordsframe,
+        newlockerframe,
         text="Username (o email):",
         font=FUTURA_FONT_S,
         text_color=APP_SECONDARY_COLOR,
@@ -338,7 +432,7 @@ def newlockerpage():
     usernameLabel.grid(row=3, column=0, padx=(20, 0), pady=10, sticky="w")
 
     usernameEntry = ctk.CTkEntry(
-        newpasswordsframe,
+        newlockerframe,
         font=FUTURA_FONT_S,
         width=400,
         height=40,
@@ -352,7 +446,7 @@ def newlockerpage():
     usernameEntry.grid(row=3, column=1, padx=(20, 0), pady=10, sticky="w")
 
     passwordLabel = ctk.CTkLabel(
-        newpasswordsframe,
+        newlockerframe,
         text="Password:",
         font=FUTURA_FONT_S,
         text_color=APP_SECONDARY_COLOR,
@@ -362,7 +456,7 @@ def newlockerpage():
     passwordLabel.grid(row=4, column=0, padx=(20, 0), pady=10, sticky="w")
 
     passwordEntry = ctk.CTkEntry(
-        newpasswordsframe,
+        newlockerframe,
         font=FUTURA_FONT_S,
         width=400,
         height=40,
@@ -376,7 +470,7 @@ def newlockerpage():
     passwordEntry.grid(row=4, column=1, padx=(20, 0), pady=10, sticky="w")
 
     confirmPasswordLabel = ctk.CTkLabel(
-        newpasswordsframe,
+        newlockerframe,
         text="Conferma Password:",
         font=FUTURA_FONT_S,
         text_color=APP_SECONDARY_COLOR,
@@ -386,7 +480,7 @@ def newlockerpage():
     confirmPasswordLabel.grid(row=5, column=0, padx=(20, 0), pady=10, sticky="w")
 
     confirmPasswordEntry = ctk.CTkEntry(
-        newpasswordsframe,
+        newlockerframe,
         font=FUTURA_FONT_S,
         width=400,
         height=40,
@@ -400,7 +494,7 @@ def newlockerpage():
     confirmPasswordEntry.grid(row=5, column=1, padx=(20, 0), pady=10, sticky="w")
 
     saveButton = ctk.CTkButton(
-        newpasswordsframe,
+        newlockerframe,
         text="Salva",
         text_color="white",
         font=FUTURA_FONT_S,
@@ -414,7 +508,8 @@ def newlockerpage():
     )
     saveButton.grid(row=6, column=1, pady=(15, 0), padx=(0, 0), sticky="e")
 
-    newpasswordsframe.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+    newlockerframe.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
 
 def lockgenpage():
     lockgenframe = tk.Frame(mainFrame)
@@ -565,9 +660,10 @@ def profilepage():
     )
     profilepagetitle.pack(padx=30, pady=0, anchor="w")
     profileframe.pack(fill=tk.BOTH, expand=True)
-    user = User("amuchina", "redos")
+
+    user = User("", "")
     authenticator = Auth()
-    authenticateduser = authenticator.register(user.to_dict(), lockboxdbcontroller)
+    authenticateduser = authenticator.register(user, lockboxdbcontroller)
 
 
 def settingspage():

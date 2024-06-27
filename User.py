@@ -2,14 +2,20 @@ class User:
     def __init__(self, username, password):
         self.name = "giovi"
         self.surname = "desio"
-        self.username = username
+        self.username = username  # username may be also email
         self.password = password
+
+    def set_name(self, name):
+        self.name = name
+
+    def set_surname(self, surname):
+        self.surname = surname
 
     def get_username(self):
         return self.username
 
     def get_password(self):
-        return self.username
+        return self.password
 
     def get_name(self):
         if self.name is not None:

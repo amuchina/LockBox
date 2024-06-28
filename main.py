@@ -60,8 +60,6 @@ EMOJI_GEAR_PATH = "./assets/gear.png"
 EMOJI_USER_PATH = "./assets/user.png"
 EMOJI_LOCK_PATH = "./assets/lock.png"
 
-rowCounter = 2
-
 authenticated_user = None
 
 mainApp = tk.Tk()
@@ -76,33 +74,12 @@ mainApp.resizable(False, False)
 
 # frames setup
 
-optionsSideBarFrame = tk.Frame(
+appFrame = tk.Frame(
     mainApp,
-    bg="#F5F5F5"
-)
-optionsSideBarFrame.pack(
-    side=tk.LEFT,
-    fill=tk.Y
-)
-contextMainFrame = tk.Frame(
-    mainApp,
-    bg=APP_BACKGROUND_COLOR
-)
-contextMainFrame.pack(
-    side=tk.LEFT,
-    fill=tk.Y
+    bg="red",
 )
 
-optionsSideBarFrame.pack_propagate(False)
-contextMainFrame.pack_propagate(False)
-
-optionsSideBarFrame.configure(
-    width=OPTIONSIDEBAR_WIDTH,
-)
-contextMainFrame.configure(
-    width=WINDOW_WIDTH - OPTIONSIDEBAR_WIDTH,
-    height=WINDOW_HEIGHT
-)
+appFrame.pack(fill=tk.BOTH, expand=True)
 
 # Load emoji images
 keyImage = ctk.CTkImage(Image.open(EMOJI_KEY_PATH).resize(ICON_SIZE_S))
@@ -119,58 +96,148 @@ gearImage = ctk.CTkImage(Image.open(EMOJI_GEAR_PATH).resize((25, 25)), size=ICON
 userImage = ctk.CTkImage(Image.open(EMOJI_USER_PATH).resize((25, 25)), size=ICON_SIZE_XS)
 lockImage = ctk.CTkImage(Image.open(EMOJI_LOCK_PATH).resize((25, 25)), size=ICON_SIZE_S)
 
-options = [
-    tk.Canvas(optionsSideBarFrame, width=OPTIONSIDEBAR_WIDTH - 35, height=1, bg="#A9A9A9", highlightthickness=0),
-    ctk.CTkButton(optionsSideBarFrame, image=keyImage, text=" Le mie password", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=mypasswordspage)),
-    ctk.CTkButton(optionsSideBarFrame, image=keyboardImage, text=" LockGen", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=lockgenpage)),
-    ctk.CTkButton(optionsSideBarFrame, image=testImage, text=" Test di resistenza", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=testpage)),
-    tk.Canvas(optionsSideBarFrame, width=OPTIONSIDEBAR_WIDTH - 35, height=1, bg="#A9A9A9", highlightthickness=0),
-    ctk.CTkButton(optionsSideBarFrame, image=fileImage, text=" Criptazione dei file", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=filespage)),
-    ctk.CTkButton(optionsSideBarFrame, image=permissionsImage, text=" Permessi di accesso", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=permissionspage)),
-    ctk.CTkButton(optionsSideBarFrame, image=signatureImage, text=" Firma digitale", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=signaturepage)),
-    ctk.CTkButton(optionsSideBarFrame, image=steganographyImage, text=" Steganografia", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=steganographypage)),
-    tk.Canvas(optionsSideBarFrame, width=OPTIONSIDEBAR_WIDTH - 35, height=1, bg="#A9A9A9", highlightthickness=0),
-    ctk.CTkButton(optionsSideBarFrame, image=identityImage, text=" La mia identita’", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=identitypage)),
-    ctk.CTkButton(optionsSideBarFrame, image=creditCardImage, text=" Carte di credito", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=cardspage)),
-    tk.Canvas(optionsSideBarFrame, width=OPTIONSIDEBAR_WIDTH - 35, height=1, bg="#A9A9A9", highlightthickness=0),
-    tk.Label(optionsSideBarFrame, text=P_TEXT, font=FUTURA_FONT_XS, fg=APP_SECONDARY_COLOR, background="#F5F5F5"),
-    tk.Label(optionsSideBarFrame, text="LockBox® 2024 by Giovanni Desio (amuchina)", font=("Futura", 6), fg=APP_SECONDARY_COLOR, background="#F5F5F5")
-]
 
-sideBarLogoImage = ImageTk.PhotoImage((Image.open(PAGELOGO_PATH).resize((52, 52))).convert(mode="RGBA"))
-sideBarLogoPanel = tk.Label(optionsSideBarFrame, image=sideBarLogoImage, bg="#F5F5F5")
-sideBarLogoPanel.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+def welcomepage():
+    welcomeFrame = tk.Frame(
+        mainApp,
+        bg=APP_BACKGROUND_COLOR
+    )
+    welcomeLogo = ImageTk.PhotoImage((Image.open(PAGELOGO_PATH).resize((52, 52))).convert(mode="RGBA"))
+    welcomeLogo = tk.Label(welcomeFrame, image=welcomeLogo, bg="#F5F5F5")
+    welcomeLogo.grid(row=0, column=0)
+    loginpagetitle = ctk.CTkLabel(
+        welcomeFrame,
+        text="Accedi",
+        font=FUTURA_FONT_L,
+        text_color=TITLE_TEXT_COLOR,
+        fg_color=APP_BACKGROUND_COLOR,
+        bg_color=APP_BACKGROUND_COLOR
+    )
+    loginpagetitle.grid(row=0, column=1, pady=(0, 5))
 
-sideBarLogoLabel = tk.Label(optionsSideBarFrame, text=TITLE_NAME, font=("Futura", 22), fg="#E52481", background="#F5F5F5")
-sideBarLogoLabel.grid(row=0, column=1, padx=0, pady=0)
+    usernameEntry = ctk.CTkEntry(
+        welcomeFrame,
+        font=FUTURA_FONT_S,
+        width=250,
+        height=40,
+        corner_radius=10,
+        fg_color="#E0E0E0",
+        text_color=APP_SECONDARY_COLOR,
+        border_width=0,
+        placeholder_text="Username (o email)",
+        placeholder_text_color=APP_SECONDARY_COLOR,
+    )
+    usernameEntry.grid(row=1, column=1, pady=(0, 5))
 
-for i in range(len(options)):
-    options[i].grid(row=rowCounter, column=0, columnspan=2, pady=10)
-    rowCounter += 1
+    passwordEntry = ctk.CTkEntry(
+        welcomeFrame,
+        font=FUTURA_FONT_S,
+        width=250,
+        height=40,
+        corner_radius=10,
+        fg_color="#E0E0E0",
+        text_color=APP_SECONDARY_COLOR,
+        border_width=0,
+        placeholder_text="Password",
+        placeholder_text_color=APP_SECONDARY_COLOR
+    )
+    passwordEntry.grid(row=2, column=1, pady=(0, 5))
 
-# frame to hold both search and username frames
-topFrame = tk.Frame(contextMainFrame, bg=APP_BACKGROUND_COLOR)
-topFrame.pack(fill=tk.X, padx=20, pady=20)
+    submitButton = ctk.CTkButton(
+        welcomeFrame,
+        text="Accedi",
+        text_color="white",
+        font=FUTURA_FONT_S,
+        corner_radius=15,
+        width=150,
+        height=40,
+        fg_color="#FB62AC",
+        hover_color="#F1328D",
+        border_width=0,
+    )
+    submitButton.grid(row=3, column=1, padx=(20, 0), pady=(0, 0))
+    
 
-searchEntry = ctk.CTkEntry(topFrame, font=FUTURA_FONT_S, width=450, height=40, corner_radius=15, fg_color="#E0E0E0", text_color=APP_SECONDARY_COLOR, border_width=0, placeholder_text="🔎 Cerca in LockBox", placeholder_text_color=APP_SECONDARY_COLOR)
-searchEntry.pack(side=tk.LEFT, padx=(0, 10))
+def homepage():
+    
+    optionsSideBarFrame = tk.Frame(
+        mainApp,
+        bg="#F5F5F5"
+    )
+    optionsSideBarFrame.pack(
+        side=tk.LEFT,
+        fill=tk.Y
+    )
+    contextMainFrame = tk.Frame(
+        mainApp,
+        bg="red"
+    )
+    contextMainFrame.pack(
+        side=tk.LEFT,
+        fill=tk.Y
+    )
+    centerContextFrame = tk.Frame(contextMainFrame, bg=APP_BACKGROUND_COLOR)
+    centerContextFrame.pack(fill=tk.BOTH, expand=True)
+    optionsSideBarFrame.pack_propagate(False)
+    contextMainFrame.pack_propagate(False)
 
-# Create buttons with emoji images
-bellButton = ctk.CTkButton(topFrame, image=bellImage, text="", corner_radius=15, width=40, height=40, fg_color="#DFDFDF", hover_color="#BEBEBE", border_width=0, command=lambda: switchpage(page=notificationhubpage))
-bellButton.pack(side=tk.RIGHT, padx=(10, 0))
+    optionsSideBarFrame.configure(
+        width=OPTIONSIDEBAR_WIDTH,
+    )
+    contextMainFrame.configure(
+        width=WINDOW_WIDTH - OPTIONSIDEBAR_WIDTH,
+        height=WINDOW_HEIGHT
+    )
+    rowCounter = 2
+    options = [
+        tk.Canvas(optionsSideBarFrame, width=OPTIONSIDEBAR_WIDTH - 35, height=1, bg="#A9A9A9", highlightthickness=0),
+        ctk.CTkButton(optionsSideBarFrame, image=keyImage, text=" Le mie password", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=mypasswordspage)),
+        ctk.CTkButton(optionsSideBarFrame, image=keyboardImage, text=" LockGen", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=lockgenpage)),
+        ctk.CTkButton(optionsSideBarFrame, image=testImage, text=" Test di resistenza", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=testpage)),
+        tk.Canvas(optionsSideBarFrame, width=OPTIONSIDEBAR_WIDTH - 35, height=1, bg="#A9A9A9", highlightthickness=0),
+        ctk.CTkButton(optionsSideBarFrame, image=fileImage, text=" Criptazione dei file", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=filespage)),
+        ctk.CTkButton(optionsSideBarFrame, image=permissionsImage, text=" Permessi di accesso", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=permissionspage)),
+        ctk.CTkButton(optionsSideBarFrame, image=signatureImage, text=" Firma digitale", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=signaturepage)),
+        ctk.CTkButton(optionsSideBarFrame, image=steganographyImage, text=" Steganografia", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=steganographypage)),
+        tk.Canvas(optionsSideBarFrame, width=OPTIONSIDEBAR_WIDTH - 35, height=1, bg="#A9A9A9", highlightthickness=0),
+        ctk.CTkButton(optionsSideBarFrame, image=identityImage, text=" La mia identita’", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=identitypage)),
+        ctk.CTkButton(optionsSideBarFrame, image=creditCardImage, text=" Carte di credito", corner_radius=8, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", width=200, height=32, hover_color="#BEBEBE", command=lambda: switchpage(page=cardspage)),
+        tk.Canvas(optionsSideBarFrame, width=OPTIONSIDEBAR_WIDTH - 35, height=1, bg="#A9A9A9", highlightthickness=0),
+        tk.Label(optionsSideBarFrame, text=P_TEXT, font=FUTURA_FONT_XS, fg=APP_SECONDARY_COLOR, background="#F5F5F5"),
+        tk.Label(optionsSideBarFrame, text="LockBox® 2024 by Giovanni Desio (amuchina)", font=("Futura", 6), fg=APP_SECONDARY_COLOR, background="#F5F5F5")
+    ]
 
-gearButton = ctk.CTkButton(topFrame, image=gearImage, text="", corner_radius=15, width=40, height=40, fg_color="#DFDFDF", hover_color="#BEBEBE", border_width=0, command=lambda: switchpage(page=settingspage))
-gearButton.pack(side=tk.RIGHT, padx=(10, 0))
+    sideBarLogoImage = ImageTk.PhotoImage((Image.open(PAGELOGO_PATH).resize((52, 52))).convert(mode="RGBA"))
+    sideBarLogoPanel = tk.Label(optionsSideBarFrame, image=sideBarLogoImage, bg="#F5F5F5")
+    sideBarLogoPanel.grid(row=0, column=0, padx=10, pady=5, sticky="w")
 
-if authenticated_user is not None:
+    sideBarLogoLabel = tk.Label(optionsSideBarFrame, text=TITLE_NAME, font=("Futura", 22), fg="#E52481", background="#F5F5F5")
+    sideBarLogoLabel.grid(row=0, column=1, padx=0, pady=0)
+
+    for i in range(len(options)):
+        options[i].grid(row=rowCounter, column=0, columnspan=2, pady=10)
+        rowCounter += 1
+
+    # frame to hold both search and username frames
+    topFrame = tk.Frame(contextMainFrame, bg=APP_BACKGROUND_COLOR)
+    topFrame.pack(fill=tk.X, padx=20, pady=20)
+
+    searchEntry = ctk.CTkEntry(topFrame, font=FUTURA_FONT_S, width=450, height=40, corner_radius=15, fg_color="#E0E0E0", text_color=APP_SECONDARY_COLOR, border_width=0, placeholder_text="🔎 Cerca in LockBox", placeholder_text_color=APP_SECONDARY_COLOR)
+    searchEntry.pack(side=tk.LEFT, padx=(0, 10))
+
+    # Create buttons with emoji images
+    bellButton = ctk.CTkButton(topFrame, image=bellImage, text="", corner_radius=15, width=40, height=40, fg_color="#DFDFDF", hover_color="#BEBEBE", border_width=0, command=lambda: switchpage(page=notificationhubpage))
+    bellButton.pack(side=tk.RIGHT, padx=(10, 0))
+
+    gearButton = ctk.CTkButton(topFrame, image=gearImage, text="", corner_radius=15, width=40, height=40, fg_color="#DFDFDF", hover_color="#BEBEBE", border_width=0, command=lambda: destroymainframe())
+    gearButton.pack(side=tk.RIGHT, padx=(10, 0))
+
+    # if authenticated_user is not None:
     usernameButton = ctk.CTkButton(topFrame, image=userImage, text="giovi", corner_radius=15, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", hover_color="#BEBEBE", height=40, border_width=0, command=lambda: switchpage(page=profilepage))
     usernameButton.pack(side=tk.RIGHT, padx=(10, 0))
-else:
-    loginButton = ctk.CTkButton(topFrame, text="Accedi", corner_radius=15, font=FUTURA_FONT_S, text_color=APP_SECONDARY_COLOR, fg_color="#DFDFDF", hover_color="#BEBEBE", height=40, border_width=0, command=lambda: switchpage(page=loginpage))
-    loginButton.pack(side=tk.RIGHT, padx=(10, 0))
 
-dividerLine = tk.Canvas(contextMainFrame, width=topFrame.winfo_width(), height=1, bg="#A9A9A9", highlightthickness=0)
-dividerLine.pack(side=tk.TOP, fill=tk.X, padx=20, pady=(0, 20))
+    dividerLine = tk.Canvas(contextMainFrame, width=topFrame.winfo_width(), height=1, bg="#A9A9A9", highlightthickness=0)
+    dividerLine.pack(side=tk.TOP, fill=tk.X, padx=20, pady=(0, 20))
 
 
 def set_auth_user(user: User):
@@ -178,11 +245,11 @@ def set_auth_user(user: User):
 
 def switchpage(page):
     if page == newlockerpage:
-        for frame in mainFrame.winfo_children():
+        for frame in centerContextFrame.winfo_children():
             frame.destroy()
             mainApp.update()
     else:
-        for frame in mainFrame.winfo_children():
+        for frame in centerContextFrame.winfo_children():
             frame.destroy()
             mainApp.update()
     page()
@@ -201,9 +268,12 @@ def createnewlocker(lockerdata):
         lockboxdbcontroller.get_cursor().close()
 
 
+
+
+
 # pages functions
 def mypasswordspage():
-    mypasswordsframe = tk.Frame(mainFrame, bg=APP_BACKGROUND_COLOR)
+    mypasswordsframe = tk.Frame(centerContextFrame, bg=APP_BACKGROUND_COLOR)
     mypasswordsframe.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
     mypasswordspagetitle = ctk.CTkLabel(
@@ -281,7 +351,7 @@ def mypasswordspage():
 
 
 def registerpage():
-    registerframe = tk.Frame(mainFrame)
+    registerframe = tk.Frame(centerContextFrame)
     registerframe.pack(fill=tk.BOTH, expand=True)
     registerframe.configure(background=APP_BACKGROUND_COLOR)
     registerpagetitle = ctk.CTkLabel(
@@ -304,7 +374,7 @@ def registerpage():
 
 
 def loginpage():
-    loginframe = tk.Frame(mainFrame)
+    loginframe = tk.Frame(appFrame)
     loginframe.pack(fill=tk.BOTH, expand=False, padx=250, pady=50)
     loginframe.configure(background=APP_BACKGROUND_COLOR)
 
@@ -379,7 +449,7 @@ def newlockerpage():
             confirmPasswordEntry.configure(border_width=2, border_color="red", text_color="red")
 
 
-    newlockerframe = ctk.CTkFrame(mainFrame)
+    newlockerframe = ctk.CTkFrame(centerContextFrame)
     newlockerframe.configure(bg_color=APP_BACKGROUND_COLOR, fg_color=APP_BACKGROUND_COLOR)
     newlockerpagetitle = ctk.CTkLabel(
         newlockerframe,
@@ -512,7 +582,7 @@ def newlockerpage():
 
 
 def lockgenpage():
-    lockgenframe = tk.Frame(mainFrame)
+    lockgenframe = tk.Frame(centerContextFrame)
     lockgenframe.configure(background=APP_BACKGROUND_COLOR)
     lockgenpagetitle = ctk.CTkLabel(
         lockgenframe,
@@ -529,7 +599,7 @@ def lockgenpage():
 
 
 def testpage():
-    testframe = tk.Frame(mainFrame)
+    testframe = tk.Frame(centerContextFrame)
     testframe.configure(background=APP_BACKGROUND_COLOR)
     testpagetitle = ctk.CTkLabel(
         testframe,
@@ -546,7 +616,7 @@ def testpage():
 
 
 def filespage():
-    filesframe = tk.Frame(mainFrame)
+    filesframe = tk.Frame(centerContextFrame)
     filesframe.configure(background=APP_BACKGROUND_COLOR)
     filespagetitle = ctk.CTkLabel(
         filesframe,
@@ -563,7 +633,7 @@ def filespage():
 
 
 def permissionspage():
-    permissionsframe = tk.Frame(mainFrame)
+    permissionsframe = tk.Frame(centerContextFrame)
     permissionsframe.configure(background=APP_BACKGROUND_COLOR)
     permissionspagetitle = ctk.CTkLabel(
         permissionsframe,
@@ -580,7 +650,7 @@ def permissionspage():
 
 
 def signaturepage():
-    signatureframe = tk.Frame(mainFrame)
+    signatureframe = tk.Frame(centerContextFrame)
     signatureframe.configure(background=APP_BACKGROUND_COLOR)
     signaturepagetitle = ctk.CTkLabel(
         signatureframe,
@@ -597,7 +667,7 @@ def signaturepage():
 
 
 def steganographypage():
-    steganographyframe = tk.Frame(mainFrame)
+    steganographyframe = tk.Frame(centerContextFrame)
     steganographyframe.configure(background=APP_BACKGROUND_COLOR)
     steganographypagetitle = ctk.CTkLabel(
         steganographyframe,
@@ -614,7 +684,7 @@ def steganographypage():
 
 
 def identitypage():
-    identityframe = tk.Frame(mainFrame)
+    identityframe = tk.Frame(centerContextFrame)
     identityframe.configure(background=APP_BACKGROUND_COLOR)
     identitypagetitle = ctk.CTkLabel(
         identityframe,
@@ -631,7 +701,7 @@ def identitypage():
 
 
 def cardspage():
-    cardsframe = tk.Frame(mainFrame)
+    cardsframe = tk.Frame(centerContextFrame)
     cardsframe.configure(background=APP_BACKGROUND_COLOR)
     cardspagetitle = ctk.CTkLabel(
         cardsframe,
@@ -648,7 +718,7 @@ def cardspage():
 
 
 def profilepage():
-    profileframe = tk.Frame(mainFrame)
+    profileframe = tk.Frame(centerContextFrame)
     profileframe.configure(background=APP_BACKGROUND_COLOR)
     profilepagetitle = ctk.CTkLabel(
         profileframe,
@@ -667,7 +737,7 @@ def profilepage():
 
 
 def settingspage():
-    settingsframe = tk.Frame(mainFrame)
+    settingsframe = tk.Frame(centerContextFrame)
     settingsframe.configure(background=APP_BACKGROUND_COLOR)
     settingspagetitle = ctk.CTkLabel(
         settingsframe,
@@ -682,7 +752,7 @@ def settingspage():
 
 
 def notificationhubpage():
-    notificationhubframe = tk.Frame(mainFrame)
+    notificationhubframe = tk.Frame(centerContextFrame)
     notificationhubframe.configure(background=APP_BACKGROUND_COLOR)
     notificationhubpagetitle = ctk.CTkLabel(
         notificationhubframe,
@@ -697,9 +767,14 @@ def notificationhubpage():
 
 
 # main frame in the center of the page, which will contain pages
-mainFrame = tk.Frame(contextMainFrame, bg=APP_BACKGROUND_COLOR)
-mainFrame.pack(fill=tk.BOTH, expand=True)
 
-mypasswordspage()
+def destroymainframe():
+    for frame in mainApp.winfo_children():
+        frame.destroy()
+        mainApp.update()
+
+
+
+welcomepage()
 lockboxdbcontroller = dbm.LockBoxDBManager()
 mainApp.mainloop()

@@ -15,9 +15,12 @@ class Auth:
         try:
             dbcontroller.get_cursor().execute(query, (newuser.get_name(), newuser.get_surname(), newuser.get_username(), newuser.get_password()))
             dbcontroller.conn.commit()
-            print("User created successfully")  # check if user already exists with same username/email
+            print(f"Successfully created and authenticated user: {newuser.get_name(), newuser.get_surname(), newuser.get_username(), newuser.get_password()}")  # check if user already exists with same username/email
+            self.authenticated_user = newuser
+            return True
         except mysql.connector.Error as err:
             print(f"Error: {err}")
+            return False
         finally:
             dbcontroller.get_cursor().close()
 
@@ -33,12 +36,25 @@ class Auth:
                 cursor.execute(query, (user.get_username(), user.get_password()))
                 response = cursor.fetchall()
                 if response:
-                    self.authenticated_user = response
-                    print(f"Successfully authenticated user: {response}")
-                    return True
+                    self.authenticated_user = response[0]
+                    print(f"Successfully authenticated user: {response[0]}")
+                    return response[0]
                 else:
                     print("Invalid username or password")
                     return False
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return False
+
+    def get_authenticated_user(self):
+        return self.authenticated_user
+
+    def get_authenticated_user_to_dict(self):
+        return {
+            "id": self.authenticated_user[0],
+            "name": self.authenticated_user[1],
+            "surname": self.authenticated_user[2],
+            "username": self.authenticated_user[3],
+            "password": self.authenticated_user[4],
+            "locker_count": self.authenticated_user[5]
+        }

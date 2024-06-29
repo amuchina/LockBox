@@ -1,7 +1,7 @@
 class User:
-    def __init__(self, username, password):
-        self.name = "giovi"
-        self.surname = "desio"
+    def __init__(self, name, surname, username, password):
+        self.name = name
+        self.surname = surname
         self.username = username  # username may be also email
         self.password = password
 
@@ -11,11 +11,11 @@ class User:
     def set_surname(self, surname):
         self.surname = surname
 
-    def get_username(self):
-        return self.username
+    def set_username(self, username):
+        self.username = username
 
-    def get_password(self):
-        return self.password
+    def set_password(self, password):
+        self.password = password
 
     def get_name(self):
         if self.name is not None:
@@ -28,6 +28,12 @@ class User:
             return self.surname
         else:
             return None
+
+    def get_username(self):
+        return self.username
+
+    def get_password(self):
+        return self.password
 
     def to_dict(self):
         return {

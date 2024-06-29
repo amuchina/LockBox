@@ -29,14 +29,16 @@ class Auth:
             AND password = %s;
         """
         try:
-            dbcontroller.get_cursor().execute(query, (user.get_username(), user.get_password()))
-            response = dbcontroller.get_cursor().fetchone()
-            if response:
-                self.authenticated_user = response
-                print(response)
-            else:
-                print("Invalid username or password")
+            with dbcontroller.get_cursor() as cursor:
+                cursor.execute(query, (user.get_username(), user.get_password()))
+                response = cursor.fetchall()
+                if response:
+                    self.authenticated_user = response
+                    print(f"Successfully authenticated user: {response}")
+                    return True
+                else:
+                    print("Invalid username or password")
+                    return False
         except mysql.connector.Error as err:
             print(f"Error: {err}")
-        finally:
-            dbcontroller.get_cursor().close()
+            return False

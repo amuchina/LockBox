@@ -13,9 +13,10 @@ class LockBoxDBManager:
         except mysql.connector.Error as err:
             print(f"Connection failed: {err}")
 
+
     def get_cursor(self):
         if self.conn and self.conn.is_connected():
-            return self.conn.cursor()
+            return self.conn.cursor(buffered=True)
         else:
             raise mysql.connector.Error("Connection is not established or has been closed.")
 

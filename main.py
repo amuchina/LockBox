@@ -6,12 +6,13 @@ import mysql.connector
 from Locker import Locker
 from Auth import Auth
 from User import User
-import random
-import string
+from HashEncrypter import HashEncrypter
 
 global sideBarLogoImage
 global topContextFrame
 global centerContextFrame
+
+global personal_user_salt
 
 FUTURA_FONT_XS = ("Futura", 12, 'normal')
 FUTURA_FONT_S = ("Futura", 18, 'normal')
@@ -126,6 +127,7 @@ def clearcolumn(frame, column_index):
 
 
 def welcomepage():
+
     def fetchandsendlogindata(usernameEntry, passwordEntry):
         user = User("", "", usernameEntry.get(), passwordEntry.get())
         checklogin(user)
@@ -134,6 +136,7 @@ def welcomepage():
             passwordEntry.configure(border_width=2, border_color="red", text_color="red")
 
     def fetchandsendregisterdata(nameEntry, surnameEntry, usernameEntry, passwordEntry, confirmPasswordEntry, errorLabel, registerButton):
+        global personal_user_salt
         if passwordEntry.get() != confirmPasswordEntry.get():
             print("Passwords doesnt match")
             passwordEntry.configure(border_width=2, border_color="red", text_color="red")
@@ -141,6 +144,8 @@ def welcomepage():
         else:
             newuser = User(nameEntry.get(), surnameEntry.get(), usernameEntry.get(), passwordEntry.get())
             accountuserrequest = authenticator.register(newuser, lockboxdbcontroller)
+            hashencrypter = HashEncrypter()
+            personal_user_string_salt, personal_user_byte_salt = hashencrypter.generate_salt_if_not_exists(authenticator, lockboxdbcontroller)
             if accountuserrequest:
                 set_current_authenticated_user(user=newuser)
                 switchpage(page=homepage)
@@ -655,7 +660,6 @@ def newlockerpage():
         else:
             passwordEntry.configure(border_width=2, border_color="red", text_color="red")
             confirmPasswordEntry.configure(border_width=2, border_color="red", text_color="red")
-
 
     newlockerframe = ctk.CTkFrame(centerContextFrame)
     newlockerframe.configure(bg_color=APP_BACKGROUND_COLOR, fg_color=APP_BACKGROUND_COLOR)

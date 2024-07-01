@@ -1,13 +1,18 @@
+import dotenv
 import mysql.connector
+from dotenv import load_dotenv
+import os
+
 
 class LockBoxDBManager:
     def __init__(self):
+        load_dotenv("envfiles/.env.secret.db")
         self.conn = None
         try:
             self.conn = mysql.connector.connect(
-                host="localhost",
-                user="root",
-                password="password"
+                host=os.getenv("DB_HOST"),
+                user=os.getenv("DB_USERNAME"),
+                password=os.getenv("DB_PASSWORD")
             )
             print("Connection established")
         except mysql.connector.Error as err:

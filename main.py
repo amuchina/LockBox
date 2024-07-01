@@ -7,6 +7,16 @@ from Locker import Locker
 from Auth import Auth
 from User import User
 from HashEncrypter import HashEncrypter
+from dotenv import load_dotenv
+import platform
+import os
+
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
+    load_dotenv("envfiles/.env.shared.linux")
+elif platform.system() == 'Windows':
+    load_dotenv("envfiles/.env.shared.windows")
+else:
+    print("ENV files not loaded: os undetectable")
 
 global sideBarLogoImage
 global topContextFrame
@@ -51,25 +61,6 @@ WINDOW_HEIGHT = 700
 
 OPTIONSIDEBAR_WIDTH = 237
 
-LOGO_PATH = "./assets/lockboxlogo.png"
-PAGELOGO_PATH = "./assets/lockboxpagelogo.png"
-
-# Add paths for emoji images
-EMOJI_KEY_PATH = "./assets/key.png"
-EMOJI_PASSWORD_PATH = "./assets/password.png"
-EMOJI_TEST_PATH = "./assets/test.png"
-EMOJI_FILE_PATH = "./assets/file.png"
-EMOJI_PERMISSIONS_PATH = "./assets/permissions.png"
-EMOJI_SIGNATURE_PATH = "./assets/signature.png"
-EMOJI_STEGANOGRAPHY_PATH = "./assets/steganography.png"
-EMOJI_IDENTITY_PATH = "./assets/identity.png"
-EMOJI_CREDIT_CARD_PATH = "./assets/credit_card.png"
-EMOJI_BELL_PATH = "./assets/bell.png"
-EMOJI_GEAR_PATH = "./assets/gear.png"
-EMOJI_USER_PATH = "./assets/user.png"
-EMOJI_LOCK_PATH = "./assets/lock.png"
-EMOJI_PENCIL_PATH = "./assets/pencil.png"
-
 current_authenticated_user = None
 authenticator = Auth()
 
@@ -80,7 +71,7 @@ mainApp = tk.Tk()
 # app init settings
 
 mainApp.title("LockBox")
-mainApp.iconbitmap("./assets/lockboxlogo.ico")
+# mainApp.iconbitmap("../assets/lockboxlogo.ico")
 mainApp.geometry(WINDOW_DIM)
 mainApp.resizable(False, False)
 
@@ -94,21 +85,21 @@ appFrame = tk.Frame(
 appFrame.pack(fill=tk.BOTH, expand=False)
 
 # Load emoji images
-keyImage = ctk.CTkImage(Image.open(EMOJI_KEY_PATH).resize(ICON_SIZE_S))
-keyboardImage = ctk.CTkImage(Image.open(EMOJI_PASSWORD_PATH).resize(ICON_SIZE_S))
-testImage = ctk.CTkImage(Image.open(EMOJI_TEST_PATH).resize(ICON_SIZE_S))
-fileImage = ctk.CTkImage(Image.open(EMOJI_FILE_PATH).resize(ICON_SIZE_S))
-permissionsImage = ctk.CTkImage(Image.open(EMOJI_PERMISSIONS_PATH).resize(ICON_SIZE_S))
-signatureImage = ctk.CTkImage(Image.open(EMOJI_SIGNATURE_PATH).resize(ICON_SIZE_S))
-steganographyImage = ctk.CTkImage(Image.open(EMOJI_STEGANOGRAPHY_PATH).resize(ICON_SIZE_S))
-identityImage = ctk.CTkImage(Image.open(EMOJI_IDENTITY_PATH).resize(ICON_SIZE_S))
-creditCardImage = ctk.CTkImage(Image.open(EMOJI_CREDIT_CARD_PATH).resize(ICON_SIZE_S))
-bellImage = ctk.CTkImage(Image.open(EMOJI_BELL_PATH).resize((25, 25)), size=ICON_SIZE_XS)
-gearImage = ctk.CTkImage(Image.open(EMOJI_GEAR_PATH).resize((25, 25)), size=ICON_SIZE_XS)
-userImage = ctk.CTkImage(Image.open(EMOJI_USER_PATH).resize((25, 25)), size=ICON_SIZE_XS)
-lockImage = ctk.CTkImage(Image.open(EMOJI_LOCK_PATH).resize((25, 25)), size=ICON_SIZE_S)
-logoImage = ctk.CTkImage(Image.open(LOGO_PATH).convert(mode='RGBA'), size=(300, 300))
-pencilImage = ctk.CTkImage(Image.open(EMOJI_PENCIL_PATH).resize((25, 25)), size=ICON_SIZE_XS)
+keyImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_KEY_PATH")).resize(ICON_SIZE_S))
+keyboardImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_PASSWORD_PATH")).resize(ICON_SIZE_S))
+testImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_TEST_PATH")).resize(ICON_SIZE_S))
+fileImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_FILE_PATH")).resize(ICON_SIZE_S))
+permissionsImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_PERMISSIONS_PATH")).resize(ICON_SIZE_S))
+signatureImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_SIGNATURE_PATH")).resize(ICON_SIZE_S))
+steganographyImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_STEGANOGRAPHY_PATH")).resize(ICON_SIZE_S))
+identityImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_IDENTITY_PATH")).resize(ICON_SIZE_S))
+creditCardImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_CREDIT_CARD_PATH")).resize(ICON_SIZE_S))
+bellImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_BELL_PATH")).resize((25, 25)), size=ICON_SIZE_XS)
+gearImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_GEAR_PATH")).resize((25, 25)), size=ICON_SIZE_XS)
+userImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_USER_PATH")).resize((25, 25)), size=ICON_SIZE_XS)
+lockImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_LOCK_PATH")).resize((25, 25)), size=ICON_SIZE_S)
+logoImage = ctk.CTkImage(Image.open(os.getenv("LOGO_PATH")).convert(mode='RGBA'), size=(300, 300))
+pencilImage = ctk.CTkImage(Image.open(os.getenv("EMOJI_PENCIL_PATH")).resize((25, 25)), size=ICON_SIZE_XS)
 
 
 def clearcell(frame, row_index, column_index):
@@ -500,7 +491,7 @@ def homepage():
                  fg=APP_SECONDARY_COLOR, background="#F5F5F5")
     ]
 
-    sideBarLogoImage = ImageTk.PhotoImage((Image.open(PAGELOGO_PATH).resize((52, 52))).convert(mode="RGBA"))
+    sideBarLogoImage = ImageTk.PhotoImage((Image.open(os.getenv("PAGELOGO_PATH")).resize((52, 52))).convert(mode="RGBA"))
     sideBarLogoPanel = tk.Label(optionsSideBarFrame, image=sideBarLogoImage, bg="#F5F5F5")
     sideBarLogoPanel.grid(row=0, column=0, padx=10, pady=5, sticky="w")
 
@@ -576,7 +567,7 @@ def mypasswordspage():
 
     mypasswordspagetitle = ctk.CTkLabel(
         mypasswordsframe,
-        image=ctk.CTkImage(Image.open(EMOJI_KEY_PATH), size=ICON_SIZE_L),
+        image=ctk.CTkImage(Image.open(os.getenv("EMOJI_KEY_PATH")), size=ICON_SIZE_L),
         compound=tk.RIGHT,
         text="Le mie password ",
         font=FUTURA_FONT_L,
@@ -799,7 +790,7 @@ def lockgenpage():
     lockgenframe.configure(background=APP_BACKGROUND_COLOR)
     lockgenpagetitle = ctk.CTkLabel(
         lockgenframe,
-        image=ctk.CTkImage(Image.open(EMOJI_PASSWORD_PATH), size=ICON_SIZE_L),
+        image=ctk.CTkImage(Image.open(os.getenv("EMOJI_PASSWORD_PATH")), size=ICON_SIZE_L),
         compound=tk.RIGHT,
         text="LockGen ",
         font=FUTURA_FONT_L,
@@ -816,7 +807,7 @@ def testpage():
     testframe.configure(background=APP_BACKGROUND_COLOR)
     testpagetitle = ctk.CTkLabel(
         testframe,
-        image=ctk.CTkImage(Image.open(EMOJI_TEST_PATH), size=ICON_SIZE_L),
+        image=ctk.CTkImage(Image.open(os.getenv("EMOJI_TEST_PATH")), size=ICON_SIZE_L),
         compound=tk.RIGHT,
         text="Test di resistenza ",
         font=FUTURA_FONT_L,
@@ -833,7 +824,7 @@ def filespage():
     filesframe.configure(background=APP_BACKGROUND_COLOR)
     filespagetitle = ctk.CTkLabel(
         filesframe,
-        image=ctk.CTkImage(Image.open(EMOJI_FILE_PATH), size=ICON_SIZE_L),
+        image=ctk.CTkImage(Image.open(os.getenv("EMOJI_FILE_PATH")), size=ICON_SIZE_L),
         compound=tk.RIGHT,
         text="Criptazione dei file ",
         font=FUTURA_FONT_L,
@@ -850,7 +841,7 @@ def permissionspage():
     permissionsframe.configure(background=APP_BACKGROUND_COLOR)
     permissionspagetitle = ctk.CTkLabel(
         permissionsframe,
-        image=ctk.CTkImage(Image.open(EMOJI_PERMISSIONS_PATH), size=ICON_SIZE_L),
+        image=ctk.CTkImage(Image.open(os.getenv("EMOJI_PERMISSIONS_PATH")), size=ICON_SIZE_L),
         compound=tk.RIGHT,
         text="Permessi di accesso ",
         font=FUTURA_FONT_L,
@@ -867,7 +858,7 @@ def signaturepage():
     signatureframe.configure(background=APP_BACKGROUND_COLOR)
     signaturepagetitle = ctk.CTkLabel(
         signatureframe,
-        image=ctk.CTkImage(Image.open(EMOJI_SIGNATURE_PATH), size=ICON_SIZE_L),
+        image=ctk.CTkImage(Image.open(os.getenv("EMOJI_SIGNATURE_PATH")), size=ICON_SIZE_L),
         compound=tk.RIGHT,
         text="Firma digitale ",
         font=FUTURA_FONT_L,
@@ -884,7 +875,7 @@ def steganographypage():
     steganographyframe.configure(background=APP_BACKGROUND_COLOR)
     steganographypagetitle = ctk.CTkLabel(
         steganographyframe,
-        image=ctk.CTkImage(Image.open(EMOJI_STEGANOGRAPHY_PATH), size=ICON_SIZE_L),
+        image=ctk.CTkImage(Image.open(os.getenv("EMOJI_STEGANOGRAPHY_PATH")), size=ICON_SIZE_L),
         compound=tk.RIGHT,
         text="Steganografia ",
         font=FUTURA_FONT_L,
@@ -901,7 +892,7 @@ def identitypage():
     identityframe.configure(background=APP_BACKGROUND_COLOR)
     identitypagetitle = ctk.CTkLabel(
         identityframe,
-        image=ctk.CTkImage(Image.open(EMOJI_IDENTITY_PATH), size=ICON_SIZE_L),
+        image=ctk.CTkImage(Image.open(os.getenv("EMOJI_IDENTITY_PATH")), size=ICON_SIZE_L),
         compound=tk.RIGHT,
         text="La mia identita’ ",
         font=FUTURA_FONT_L,
@@ -918,7 +909,7 @@ def cardspage():
     cardsframe.configure(background=APP_BACKGROUND_COLOR)
     cardspagetitle = ctk.CTkLabel(
         cardsframe,
-        image=ctk.CTkImage(Image.open(EMOJI_CREDIT_CARD_PATH), size=ICON_SIZE_L),
+        image=ctk.CTkImage(Image.open(os.getenv("EMOJI_CREDIT_CARD_PATH")), size=ICON_SIZE_L),
         compound=tk.RIGHT,
         text="Carte di credito ",
         font=FUTURA_FONT_L,

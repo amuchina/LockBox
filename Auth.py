@@ -105,6 +105,9 @@ class Auth:
     def get_authenticated_user(self):
         return self.authenticated_user
 
+    def get_authenticated_user_id(self):
+        return self.authenticated_user[0]
+
     def get_authenticated_username(self):
         return self.authenticated_user[3]
 

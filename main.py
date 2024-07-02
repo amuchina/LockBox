@@ -18,11 +18,13 @@ elif platform.system() == 'Windows':
 else:
     print("ENV files not loaded: os undetectable")
 
+global hashencrypter
+
 global sideBarLogoImage
 global topContextFrame
 global centerContextFrame
 
-global personal_user_salt
+global personal_user_string_salt, personal_user_byte_salt
 
 FUTURA_FONT_XS = ("Futura", 12, 'normal')
 FUTURA_FONT_S = ("Futura", 18, 'normal')
@@ -71,7 +73,7 @@ mainApp = tk.Tk()
 # app init settings
 
 mainApp.title("LockBox")
-# mainApp.iconbitmap("../assets/lockboxlogo.ico")
+mainApp.iconbitmap(os.getenv("ICO_LOGO_PATH"))
 mainApp.geometry(WINDOW_DIM)
 mainApp.resizable(False, False)
 
@@ -127,7 +129,7 @@ def welcomepage():
             passwordEntry.configure(border_width=2, border_color="red", text_color="red")
 
     def fetchandsendregisterdata(nameEntry, surnameEntry, usernameEntry, passwordEntry, confirmPasswordEntry, errorLabel, registerButton):
-        global personal_user_salt
+        global hashencrypter, personal_user_string_salt, personal_user_byte_salt
         if passwordEntry.get() != confirmPasswordEntry.get():
             print("Passwords doesnt match")
             passwordEntry.configure(border_width=2, border_color="red", text_color="red")
@@ -136,7 +138,7 @@ def welcomepage():
             newuser = User(nameEntry.get(), surnameEntry.get(), usernameEntry.get(), passwordEntry.get())
             accountuserrequest = authenticator.register(newuser, lockboxdbcontroller)
             hashencrypter = HashEncrypter()
-            personal_user_string_salt, personal_user_byte_salt = hashencrypter.generate_salt_if_not_exists(authenticator, lockboxdbcontroller)
+            personal_user_string_salt, personal_user_byte_salt = hashencrypter.generate_salt(authenticator, lockboxdbcontroller)
             if accountuserrequest:
                 set_current_authenticated_user(user=newuser)
                 switchpage(page=homepage)
@@ -547,19 +549,6 @@ def switchpage(page):
     page()
 
 
-def createnewlocker(lockerdata):  # refactor
-    locker = Locker(service_name=lockerdata[0], username=lockerdata[1], password=lockerdata[2])
-    query = "INSERT INTO lockbox.lockers (service_name, username, password, locker_owner_ID) VALUES (%s, %s, %s, %s)"
-    try:
-        lockboxdbcontroller.get_cursor().execute(query, (locker.service_name, locker.username, locker.password, 1))
-        lockboxdbcontroller.conn.commit()
-        print("Locker created successfully")
-    except mysql.connector.Error as err:
-        print(f"Error in locker creation: {err}")
-    finally:
-        lockboxdbcontroller.get_cursor().close()
-
-
 # pages functions
 def mypasswordspage():
     mypasswordsframe = tk.Frame(centerContextFrame, bg=APP_BACKGROUND_COLOR)
@@ -639,6 +628,8 @@ def mypasswordspage():
 
 
 def newlockerpage():
+    global personal_user_string_salt
+
     lockerdata = []
 
     def fetchandcreatelocker():
@@ -651,6 +642,20 @@ def newlockerpage():
         else:
             passwordEntry.configure(border_width=2, border_color="red", text_color="red")
             confirmPasswordEntry.configure(border_width=2, border_color="red", text_color="red")
+
+    def createnewlocker(newlockerdata):
+        locker = Locker(service_name=newlockerdata[0], username=newlockerdata[1], password=newlockerdata[2])
+        query = "INSERT INTO lockbox.lockers (service_name, username, password, locker_owner_ID) VALUES (%s, %s, %s, %s)"
+        try:
+            # continue
+            encrypted_locker_password_data = locker.save(hashencrypter, personal_user_string_salt)
+            lockboxdbcontroller.get_cursor().execute(query, (locker.service_name, locker.username, encrypted_locker_password_data, authenticator.get_authenticated_user_id()))
+            lockboxdbcontroller.conn.commit()
+            print("Locker created successfully")
+        except mysql.connector.Error as err:
+            print(f"Error in locker creation: {err}")
+        finally:
+            lockboxdbcontroller.get_cursor().close()
 
     newlockerframe = ctk.CTkFrame(centerContextFrame)
     newlockerframe.configure(bg_color=APP_BACKGROUND_COLOR, fg_color=APP_BACKGROUND_COLOR)

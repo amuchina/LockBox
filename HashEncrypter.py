@@ -1,16 +1,21 @@
-import hashlib
 import bcrypt
-import User
+import hashlib
 import mysql.connector
 import LockBoxDBManager
 import Auth
+import binascii
 
 
 class HashEncrypter:
     def __init__(self):
         print("HashEncrypter initialized")
 
-    def generate_salt_if_not_exists(self, authenticator: Auth, dbcontroller: LockBoxDBManager):
+    def gen_sha256_digest(self, salt, password):
+        byte_digest = hashlib.pbkdf2_hmac('sha512', password, salt, 250000)
+        hex_digest = binascii.hexlify(byte_digest)
+        return hex_digest
+
+    def generate_salt(self, authenticator: Auth, dbcontroller: LockBoxDBManager):
         checksaltquery = """
             SELECT personal_user_salt
             FROM lockbox.users
@@ -35,5 +40,7 @@ class HashEncrypter:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return False
+
+
 
 

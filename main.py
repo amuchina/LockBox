@@ -18,13 +18,9 @@ elif platform.system() == 'Windows':
 else:
     print("ENV files not loaded: os undetectable")
 
-global hashencrypter
-
 global sideBarLogoImage
 global topContextFrame
 global centerContextFrame
-
-global personal_user_string_salt, personal_user_byte_salt
 
 FUTURA_FONT_XS = ("Futura", 12, 'normal')
 FUTURA_FONT_S = ("Futura", 18, 'normal')
@@ -64,7 +60,12 @@ WINDOW_HEIGHT = 700
 OPTIONSIDEBAR_WIDTH = 237
 
 current_authenticated_user = None
+
 authenticator = Auth()
+hashencrypter = HashEncrypter()
+
+personal_user_string_salt = None
+personal_user_byte_salt = ""
 
 fieldsdata = []
 
@@ -119,35 +120,37 @@ def clearcolumn(frame, column_index):
             widget.grid_forget()
 
 
-def welcomepage():
+def fetchandsendlogindata(usernameEntry, passwordEntry):
+    user = User("", "", usernameEntry.get(), passwordEntry.get())
+    checklogin(user, personal_user_byte_salt)
+    if current_authenticated_user is None:
+        usernameEntry.configure(border_width=2, border_color="red", text_color="red")
+        passwordEntry.configure(border_width=2, border_color="red", text_color="red")
 
-    def fetchandsendlogindata(usernameEntry, passwordEntry):
-        user = User("", "", usernameEntry.get(), passwordEntry.get())
-        checklogin(user)
-        if current_authenticated_user is None:
-            usernameEntry.configure(border_width=2, border_color="red", text_color="red")
-            passwordEntry.configure(border_width=2, border_color="red", text_color="red")
 
-    def fetchandsendregisterdata(nameEntry, surnameEntry, usernameEntry, passwordEntry, confirmPasswordEntry, errorLabel, registerButton):
-        global hashencrypter, personal_user_string_salt, personal_user_byte_salt
-        if passwordEntry.get() != confirmPasswordEntry.get():
-            print("Passwords doesnt match")
-            passwordEntry.configure(border_width=2, border_color="red", text_color="red")
-            confirmPasswordEntry.configure(border_width=2, border_color="red", text_color="red")
+def fetchandsendregisterdata(nameEntry, surnameEntry, usernameEntry, passwordEntry, confirmPasswordEntry, errorLabel, registerButton):
+    global personal_user_string_salt, personal_user_byte_salt
+
+    if passwordEntry.get() != confirmPasswordEntry.get():
+        print("Passwords doesnt match")
+        passwordEntry.configure(border_width=2, border_color="red", text_color="red")
+        confirmPasswordEntry.configure(border_width=2, border_color="red", text_color="red")
+    else:
+        newuser = User(nameEntry.get(), surnameEntry.get(), usernameEntry.get(), passwordEntry.get())
+        accountuserrequest = authenticator.register(newuser, lockboxdbcontroller)
+        personal_user_string_salt, personal_user_byte_salt = hashencrypter.generate_salt(authenticator, lockboxdbcontroller)
+        set_current_user_salt(personal_user_string_salt, personal_user_byte_salt)
+        if accountuserrequest:
+            set_current_authenticated_user(user=newuser)
+            switchpage(page=homepage)
         else:
-            newuser = User(nameEntry.get(), surnameEntry.get(), usernameEntry.get(), passwordEntry.get())
-            accountuserrequest = authenticator.register(newuser, lockboxdbcontroller)
-            hashencrypter = HashEncrypter()
-            personal_user_string_salt, personal_user_byte_salt = hashencrypter.generate_salt(authenticator, lockboxdbcontroller)
-            if accountuserrequest:
-                set_current_authenticated_user(user=newuser)
-                switchpage(page=homepage)
-            else:
-                print("User already exists")
-                usernameEntry.configure(border_width=2, border_color="red", text_color="red")
-                errorLabel.grid(row=8, column=2, pady=(5, 5))
-                registerButton.grid(row=9, column=2, pady=(0, 50), sticky="n")
+            print("User already exists")
+            usernameEntry.configure(border_width=2, border_color="red", text_color="red")
+            errorLabel.grid(row=8, column=2, pady=(5, 5))
+            registerButton.grid(row=9, column=2, pady=(0, 50), sticky="n")
 
+
+def welcomepage():
     def showloginform():
         clearcolumn(welcomeFrame, 2)
         loginFrame = tk.Frame(welcomeFrame, bg=APP_BACKGROUND_COLOR)
@@ -392,9 +395,16 @@ def welcomepage():
     showloginform()
 
 
-def set_current_authenticated_user(user):
+def set_current_authenticated_user(user, salt):
     global current_authenticated_user
     current_authenticated_user = user
+    personal_user_byte_salt = salt
+
+
+def set_current_user_salt(strsalt, bytesalt):
+    global personal_user_string_salt, personal_user_byte_salt
+    personal_user_string_salt = strsalt
+    personal_user_byte_salt = bytesalt
 
 
 def logoutuser():
@@ -404,10 +414,10 @@ def logoutuser():
     mainApp.destroy()
 
 
-def checklogin(user: User):
+def checklogin(user: User, salt):
     authuser = authenticator.login(user, lockboxdbcontroller)
     if authuser:
-        set_current_authenticated_user(user=authuser)
+        set_current_authenticated_user(user=authuser, salt=salt)
         switchpage(page=homepage)
     else:
         print("Not logged in (Invalid username or password)")
@@ -628,7 +638,6 @@ def mypasswordspage():
 
 
 def newlockerpage():
-    global personal_user_string_salt
 
     lockerdata = []
 
@@ -647,8 +656,7 @@ def newlockerpage():
         locker = Locker(service_name=newlockerdata[0], username=newlockerdata[1], password=newlockerdata[2])
         query = "INSERT INTO lockbox.lockers (service_name, username, password, locker_owner_ID) VALUES (%s, %s, %s, %s)"
         try:
-            # continue
-            encrypted_locker_password_data = locker.save(hashencrypter, personal_user_string_salt)
+            encrypted_locker_password_data = locker.save(hashencrypter=hashencrypter, salt=personal_user_byte_salt)
             lockboxdbcontroller.get_cursor().execute(query, (locker.service_name, locker.username, encrypted_locker_password_data, authenticator.get_authenticated_user_id()))
             lockboxdbcontroller.conn.commit()
             print("Locker created successfully")

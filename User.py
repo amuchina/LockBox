@@ -1,4 +1,15 @@
+from pydantic import BaseModel
+from typing import Optional
+from uuid import UUID, uuid4
+
+
 class User:
+    uuid: UUID = uuid4()
+    name: Optional = None
+    surname: Optional = None
+    username: str
+    password: str
+
     def __init__(self, name, surname, username, password):
         self.name = name
         self.surname = surname

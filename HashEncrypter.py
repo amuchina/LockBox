@@ -11,7 +11,7 @@ class HashEncrypter:
         print("HashEncrypter initialized")
 
     def gen_sha256_digest(self, salt, password):
-        byte_digest = hashlib.pbkdf2_hmac('sha512', password, salt, 250000)
+        byte_digest = hashlib.pbkdf2_hmac(hash_name='sha512', password=password, salt=salt, iterations=250000)
         hex_digest = binascii.hexlify(byte_digest)
         return hex_digest
 

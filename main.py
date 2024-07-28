@@ -3,18 +3,18 @@ import customtkinter as ctk
 from PIL import ImageTk, Image
 import LockBoxDBManager as dbm
 import mysql.connector
-from Locker import Locker
-from Auth import Auth
-from User import User
+from models.Locker import Locker
+from Authenticator import Authenticator
+from models.User import User
 from HashEncrypter import HashEncrypter
 from dotenv import load_dotenv
 import platform
 import os
 
 if platform.system() == 'Linux' or platform.system() == 'Darwin':
-    load_dotenv("envfiles/.env.shared.linux")
+    load_dotenv("env/.env.shared.linux")
 elif platform.system() == 'Windows':
-    load_dotenv("envfiles/.env.shared.windows")
+    load_dotenv("env/.env.shared.windows")
 else:
     print("ENV files not loaded: os undetectable")
 
@@ -61,7 +61,7 @@ OPTIONSIDEBAR_WIDTH = 237
 
 current_authenticated_user = None
 
-authenticator = Auth()
+authenticator = Authenticator()
 hashencrypter = HashEncrypter()
 
 personal_user_string_salt = None
@@ -1116,5 +1116,5 @@ def destroymainframe():
 
 
 welcomepage()
-lockboxdbcontroller = dbm.LockBoxDBManager()
+lockboxdbcontroller = dbm.connect()
 mainApp.mainloop()

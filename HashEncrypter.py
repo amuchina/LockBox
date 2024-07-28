@@ -2,7 +2,7 @@ import bcrypt
 import hashlib
 import mysql.connector
 import LockBoxDBManager
-import Auth
+import Authenticator
 import binascii
 
 

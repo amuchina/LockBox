@@ -1,9 +1,9 @@
-import User
+from models import User
 import mysql.connector
 import LockBoxDBManager
 
 
-class Auth:
+class Authenticator:
     def __init__(self):
         self.authenticated_user = None
         print(f"Authenticator initialized: current user({self.authenticated_user})")
@@ -22,11 +22,15 @@ class Auth:
                 self.authenticated_user = loginrequest
                 return True
             else:
-                print("Not logged in")
-                return False
+                print("Authenticator LOG: Not logged in")
+                return "NL"
+
+        except mysql.connector.IntegrityError as err:
+            print(f"Authenticator LOG: Integrity Error raised ({err})")
+            return "IE"
         except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return False
+            print(f"Authenticator LOG: {err}")
+            return "GE"
         finally:
             dbcontroller.get_cursor().close()
 

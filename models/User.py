@@ -1,20 +1,25 @@
-from pydantic import BaseModel
+from LockBoxDBManager import BaseModel
 from typing import Optional
 from uuid import UUID, uuid4
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+from models import Locker
 
 
-class User:
+class User(BaseModel):
+
+    __tablename__ = "users"
+
     uuid: UUID = uuid4()
-    name: Optional = None
-    surname: Optional = None
-    username: str
-    password: str
+    id = Column(Integer, primary_key=True)
+    name: Optional[str] = Column(String, index=True, nullable=True)
+    surname: Optional[str] = Column(String, index=True, nullable=True)
+    username: str = Column(String, unique=True, index=True, nullable=False)
+    hashed_password: str = Column(String, unique=True, index=True, nullable=False)
+    lockers_counter: int = Column(Integer, index=True, nullable=False, default=0)
+    personal_user_salt: str = Column(String, index=True, nullable=True)
 
-    def __init__(self, name, surname, username, password):
-        self.name = name
-        self.surname = surname
-        self.username = username  # username may be also email
-        self.password = password
+    lockers = relationship(Locker, back_populates="owner")
 
     def set_name(self, name):
         self.name = name
@@ -48,6 +53,7 @@ class User:
 
     def to_dict(self):
         return {
+            "uuid": str(self.uuid),
             "name": self.name,
             "surname": self.surname,
             "username": self.username,

@@ -8,13 +8,13 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    personal_user_salt: bytes = None
+    personal_user_salt: bytes or None = None
 
 
 class User(UserBase):
     id: int
-    name: str = None
-    surname: str = None
+    name: str or None = None
+    surname: str or None = None
 
     class Config:
         from_attributes = True

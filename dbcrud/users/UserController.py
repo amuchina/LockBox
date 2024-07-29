@@ -20,15 +20,11 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(User).offset(skip).limit(limit).all()
 
 
-def create_user(db: Session, user: UserCreate, salt: bytes):
+def create_user(db: Session, user: UserCreate, salt):
     if not salt:
         salt = os.urandom(32)
     try:
-        hashed_password = hashlib.sha512()
-        hashed_password.update(salt)
-        hashed_password.update(user.password.encode())  # type: ignore
-        hashed_password = hashed_password.hexdigest()
-        new_user = User(username=user.username, hashed_password=hashed_password)  # type: ignore
+        new_user = User(username=user.username, hashed_password=user.password, personal_user_salt=salt.decode())
         db.add(new_user)
         db.commit()
         db.refresh(new_user)

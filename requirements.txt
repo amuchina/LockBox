@@ -8,3 +8,6 @@ cryptography~=42.0.8
 uvicorn~=0.30.3
 pydantic~=2.8.2
 SQLAlchemy~=2.0.31
+jose~=1.0.0
+passlib~=1.7.4
+starlette~=0.37.2

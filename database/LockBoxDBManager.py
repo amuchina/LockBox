@@ -7,7 +7,12 @@ from sqlalchemy import exc
 
 load_dotenv("../env/.env.secret.db")
 
-BaseModel = declarative_base()
+
+class Base:
+    __allow_unmapped__ = True
+
+
+BaseModel = declarative_base(cls=Base)
 
 try:
     dbengine = create_engine("mysql://root:password@localhost/lockbox")

@@ -91,17 +91,17 @@ def read_user(current_user: User = Depends(get_current_active_user)):
     return current_user
 
 
-@AuthAPI.post("/token", response_model=Token)
+@AuthAPI.post("/login", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = auth_user(db, form_data.username, form_data.password)
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expiring_time=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "expiring_time": access_token_expires.total_seconds()}
 
 
-@AuthAPI.post("/register/", response_model=UserBase)
+@AuthAPI.post("/register", response_model=UserBase)
 async def register(user: UserCreate, db_session: Session = Depends(get_db)):
     existing_user = UserController.get_user_by_username(db_session, username=user.username)
     if existing_user:
@@ -109,7 +109,7 @@ async def register(user: UserCreate, db_session: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already registered")
     hashed_password = get_password_hash(user.password)
     user.password = hashed_password
-    return UserController.create_user(db=db_session, user=user, salt=user.personal_user_salt)
+    return UserController.create_user(db=db_session, user=user)
 
 if __name__ == "__main__":
     import uvicorn

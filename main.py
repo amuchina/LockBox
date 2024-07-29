@@ -1,7 +1,7 @@
 import tkinter as tk
 import customtkinter as ctk
 from PIL import ImageTk, Image
-import LockBoxDBManager as dbm
+from database import LockBoxDBManager as dbm
 import mysql.connector
 from models.Locker import Locker
 from Authenticator import Authenticator

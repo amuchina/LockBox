@@ -8,7 +8,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    personal_user_salt: str = None
+    personal_user_salt: bytes = None
 
 
 class User(UserBase):
@@ -17,4 +17,4 @@ class User(UserBase):
     surname: str = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

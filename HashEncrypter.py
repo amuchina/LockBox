@@ -1,8 +1,7 @@
 import bcrypt
 import hashlib
 import mysql.connector
-import LockBoxDBManager
-import Authenticator
+from database import LockBoxDBManager
 import binascii
 
 

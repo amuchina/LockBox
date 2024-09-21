@@ -3,9 +3,6 @@ import customtkinter as ctk
 from PIL import ImageTk, Image
 from database import LockBoxDBManager as dbm
 import mysql.connector
-from models.Locker import Locker
-from Authenticator import Authenticator
-from models.User import User
 from HashEncrypter import HashEncrypter
 from dotenv import load_dotenv
 import platform
@@ -61,7 +58,6 @@ OPTIONSIDEBAR_WIDTH = 237
 
 current_authenticated_user = None
 
-authenticator = Authenticator()
 hashencrypter = HashEncrypter()
 
 personal_user_string_salt = None

@@ -54,7 +54,7 @@ def create_access_token(data: dict, expiring_time: timedelta or None = None):
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db_session: Session = Depends(get_db)):
+def get_current_user(token: str = Depends(oauth2_scheme), db_session: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -62,6 +62,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db_session: Sess
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"[LOG]: Payload decoded: {payload}")
         username: str = payload.get("sub")
         if username is None:
             print("[LOG]: No user found with given username")
@@ -75,7 +76,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db_session: Sess
     if user is None:
         print("[LOG]: No user found with given username")
         raise credentials_exception
-
+    print(f"[LOG]: Found user: {user.username}")
     return user
 
 
@@ -86,7 +87,7 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     return current_user
 
 
-@AuthAPI.get("/users/me/", response_model=User)
+@AuthAPI.post("/users/me/", response_model=User)
 def read_user(current_user: User = Depends(get_current_active_user)):
     return current_user
 
